@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from os.path import basename
 #import audiosegment
-from multiprocessing import Pool,freeze_support
+from multiprocessing import Pool, freeze_support
 
 import sys
 import numpy
@@ -20,6 +20,7 @@ import librosa
 import pickle
 import acousticFeatures
 
+from typing import Dict, Tuple, List
 
 #Constant
 EMOTION_ANNOTATORS = {'anger': 0, 'happiness' : 1, 'sadness' : 2, 'neutral' : 3, 'frustration' : 4, 'excited': 5,
@@ -179,10 +180,32 @@ def audio2Features(file):
         
         
 #Function for getting input vector and corresponding output      
-def parallel_task(d0, d1):
+def parallel_task(d0, d1, d2):
     print("task...")
     # Each input diectory contains many file
     # This fucntion will walk through all valid 'wav'files in this directory and get features like engergy, frequency...
+    
+    def get_transcription(file: str) -> Dict[str, str] :
+        """ Get all transriptions in file
+
+            :param file: It is the path of the file
+            :return: Dict. Keys are name of audio files. Values are their transcrips
+        """
+        result = {} # Dict containing the result 
+        with open(file) as f:
+            for line in f:
+                print("Orogin line:", line)
+                parts = line.split(' ', maxsplit=2) # Example of one line in file: Name_file [t1-t2]: Transcript.
+                try:
+                    result[parts[0]] = parts[2]
+                except:
+                    print("Error caused by: ", parts)
+                    print("In file:", file)
+                    result[parts[0]] = ""
+
+        return result
+    
+    
     def parseInput(dir):
         dicts = {} 
         for f in os.listdir(dir):
@@ -267,6 +290,7 @@ def parallel_task(d0, d1):
     ### Parse input and output files and get input and output as vector
     dicts_in = parseInput(d0)
     dicts_out = parseOutput(d1)
+    dicts_transcript = get_transcription(d2)
     in_out = []
     
     keys = list(dicts_in.keys())
@@ -274,7 +298,7 @@ def parallel_task(d0, d1):
            
         value = dicts_in[key].input2Vec(onlySpectrogram=False, onlyAcoustic=True)
         if(value.all() != None ):
-            in_out.append((value, dicts_out[key].output2Vec()))
+            in_out.append((value, dicts_out[key].output2Vec(), dicts_transcript[key]))
     return in_out
     
     
@@ -287,6 +311,7 @@ def createInput_Output():
         name_session = "Session" + str(i)
         root_dir_of_wav = DATA_DIR + "/" + name_session + "/sentences" + "/wav"
         root_dir_of_labels = DATA_DIR + "/" + name_session + "/dialog" + "/EmoEvaluation"
+        root_dir_of_transcripts = DATA_DIR + "/" + name_session + "/dialog" + "/transcriptions"
 
         for x in os.walk(root_dir_of_wav):
             if(x[0] == root_dir_of_wav):
@@ -294,17 +319,21 @@ def createInput_Output():
                 index = -1
             else:
                 index = index + 1
-                input_output.append((x[0], root_dir_of_labels + "/" + dirs_of_wav[index] + ".txt"))
+                input_output.append((x[0], 
+                                     root_dir_of_labels + "/" + dirs_of_wav[index] + ".txt",
+                                     root_dir_of_transcripts + "/" + dirs_of_wav[index] + ".txt"
+                                   ))
                 
     
     ds = input_output
     in_out = []
     input = []
     out = []
+    transcripts = []
     
     # Multi processing
-    with Pool(processes=8) as pool:
-         in_out = pool.starmap(parallel_task, ds)
+    with Pool(processes=4) as pool:
+         in_out = pool.starmap(parallel_task, ds[0:2])
    
     r = []
     for e in in_out:
@@ -312,9 +341,11 @@ def createInput_Output():
     
     input = [x[0] for x in r]
     out = [x[1] for x in r]
+    transcripts = [x[2] for x in r]
     print("Finished creating input output into txt file")
     print("len input and output:", len(input), ", ", len(out))
-    return (input, out)
+    return (input, out, transcripts)
+
  
 
 
@@ -326,7 +357,9 @@ if __name__ == '__main__':
     if isRawDataProcessed == False:
 
         ##Get input, normalize input, get output
-        input, output = createInput_Output()
+        input, output, transcript = createInput_Output()
+
+        transcript = np.array(transcript)
         output = np.array(output)
 
         if(method == METHOD['audio_feature']):
@@ -334,9 +367,12 @@ if __name__ == '__main__':
            # input = input / input.max(axis=0)
             filehandlerInput = open('processed-data/input_VAD.obj', 'wb')
             filehandlerOutput = open('processed-data/output_VAD.obj', 'wb')
+            filehandlerTranscript = open('processed-data/transcript_VAD.obj', 'wb')
 
 
         pickle.dump(input, filehandlerInput)
         pickle.dump(output, filehandlerOutput)
+        pickle.dump(transcript, filehandlerTranscript)
+
         print("Finish write processed data (input, output) to file!!!")
 
