@@ -106,9 +106,9 @@ def getAllFeatures(file):
         times = [pitch.get_time_from_frame_number(i) for i in range(1, num_frames+1)]
 
         #Get energy
-        energy = snd.get_energy()
-        if('energy' in feature_name):
-            features.append(energy)
+#         energy = snd.get_energy()
+#         if('energy' in feature_name):
+#             features.append(energy)
 
         #Get F0 statitic
         f0_arr = pitch.selected_array['frequency']
@@ -195,14 +195,14 @@ def getAllFeatures(file):
             breaks_degree = 0
             
 
-        if('unvoiced_percent' in feature_name):
-            features = np.append(features, unvoiced_percent)  
-        if('breaks_degree' in feature_name):
-            features = np.append(features, breaks_degree)
-        if('max_dur_pause' in feature_name):
-            features = np.append(features, max_dur_pause)
-        if('average_dur_pause' in feature_name):
-            features = np.append(features, average_dur_pause)
+#         if('unvoiced_percent' in feature_name):
+#             features = np.append(features, unvoiced_percent)  
+#         if('breaks_degree' in feature_name):
+#             features = np.append(features, breaks_degree)
+#         if('max_dur_pause' in feature_name):
+#             features = np.append(features, max_dur_pause)
+#         if('average_dur_pause' in feature_name):
+#             features = np.append(features, average_dur_pause)
             
 
     
