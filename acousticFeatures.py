@@ -238,6 +238,8 @@ def getAllFeatures(file):
     return features
 
 
+
+
 # a = getAllFeatures("1.wav")   
 # print(len(a))  
 
