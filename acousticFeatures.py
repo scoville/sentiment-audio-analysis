@@ -1,25 +1,6 @@
-
-# coding: utf-8
-
-# In[2]:
-
-
-
-
-
-# In[14]:
-
-
 import pydub 
 import numpy as np
 import sys
-#modulePath = '../../ChristiansPythonLibrary/src' 
-#sys.path.append(modulePath)
-#import generalUtility
-#import dspUtil
-#import praatUtil
-#import generalUtility
-#import matplotlibUtil
 import parselmouth 
 
 # Get Jittle
@@ -65,7 +46,6 @@ def getStatistic(numpy_arr):
     per25_v = np.percentile(numpy_arr, 25)
     per75_v= np.percentile(numpy_arr, 75)
     std_v = np.std(numpy_arr)
-    #return np.array([max_v])
     return np.array([max_v, min_v, range_v, mean_v, median_v, per25_v, per75_v, std_v])
 
 
@@ -77,8 +57,6 @@ def estimate_voiced_unvoiced_and_breaks(file, THRESHOLD_UNVOICED = 0.1 ):
     num_breaks = []
     num_unvoiced = []
     num_voiced = []
-    
-  
     temp = []
     i = 0
     while(i < len(amplitude_arr)-1):
@@ -108,17 +86,14 @@ def estimate_voiced_unvoiced_and_breaks(file, THRESHOLD_UNVOICED = 0.1 ):
     return num_voiced, num_unvoiced, num_breaks
 
 
-feature_name= ['energy', 
+feature_name= np.array(['energy', 
                'f0', 'intensity', 'f1', 'f2', 'f3','f1-bw','f2-bw','f3-bw' ,
                'f2-f1', 'f3-f1', 
                'jitter', 'shimmer', 'duration',
-              'unvoiced_percent', 'breaks_degree', 'max_dur_pause', 'average_dur_pause']
+              'unvoiced_percent', 'breaks_degree', 'max_dur_pause', 'average_dur_pause'])
 
-#feature_name= ['energy','f0','intensity', 'f1', 'f2', 'f3']
-feature_name = np.array(feature_name)
 
 def getAllFeatures(file):
-    #print("file: ", file)
     try:
         features = []
 
@@ -237,11 +212,6 @@ def getAllFeatures(file):
    
     return features
 
-
-
-
-# a = getAllFeatures("1.wav")   
-# print(len(a))  
 
 
 
