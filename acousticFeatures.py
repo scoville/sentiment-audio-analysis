@@ -3,6 +3,8 @@ import numpy as np
 import sys
 import parselmouth 
 
+# Jittle and Shimmer describe in this paper 
+#https://www.sciencedirect.com/science/article/pii/S2212017314003612
 # Get Jittle
 def calculateJitter(data):
     """Data is list of time of peaks"""
@@ -205,7 +207,7 @@ def getAllFeatures(file):
 #             features = np.append(features, average_dur_pause)
                 
     except :
-        print("May be file is so short: ", file)
+        print("File {} may be too short. Acoustic features will assign to None  ".format(file))
         return np.array([None])
    
     return features
