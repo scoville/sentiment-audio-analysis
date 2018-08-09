@@ -203,9 +203,7 @@ def getAllFeatures(file):
 #             features = np.append(features, max_dur_pause)
 #         if('average_dur_pause' in feature_name):
 #             features = np.append(features, average_dur_pause)
-            
-
-    
+                
     except :
         print("May be file is so short: ", file)
         return np.array([None])
